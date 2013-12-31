@@ -217,6 +217,9 @@ if __name__ == '__main__':
     # options and flags
     parser.add_argument('-o', '--output-dir', type=os.path.abspath,
             help='Directory to output transcoded files to')
+    parser.add_argument('-d', '--root-dir', type=os.path.abspath,
+            help='Root directory containing your source media.  Preserve directory ' +
+            'structure from this point in --output-dir')
     parser.add_argument('-s', '--skip-existing', action='store_true',
             help='Skip transcoding files if the output file already exists')
     parser.add_argument('-l', '--logfile', type=os.path.normpath, default=None,
@@ -272,7 +275,12 @@ if __name__ == '__main__':
 
     # get the common prefix of all the files so we can preserve directory
     # structure when an output directory is specified.
-    common_prefix = os.path.dirname(os.path.commonprefix(files))
+    if args.root_dir:
+        # use the source root directory provided on the command line
+        common_prefix = args.root_dir
+    else:
+        # ...or detect the common prefix from the input file list
+        common_prefix = os.path.dirname(os.path.commonprefix(files))
 
     def transcode_with_logging(f):
         '''Transcode the given file and print out progress statistics.'''
