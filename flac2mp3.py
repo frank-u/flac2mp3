@@ -106,7 +106,7 @@ def transcode(infile, outfile=None, skip_existing=False, bad_chars=''):
     # way of --skip-existing.
 
     # create the file in the same dir (and same filesystem) as the final target,
-    # allowing us to use os.link rather than shutil.move later.
+    # this keeps our final shutil.move efficient
     dirname = os.path.dirname(outfile)
     with tempfile.NamedTemporaryFile(dir=dirname, suffix='.tmp') as temp_outfile:
         # get the tags from the input file
@@ -141,7 +141,9 @@ def transcode(infile, outfile=None, skip_existing=False, bad_chars=''):
 
         # if the transcode worked, link the temp file to the final filename
         if retval == 0:
-            os.link(temp_outfile.name, outfile)
+            shutil.move(temp_outfile.name, outfile)
+            # we're keeping this temp file.  Don't delete it
+            temp_outfile.delete = False
 
     return retval
 
