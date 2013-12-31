@@ -62,6 +62,29 @@ def walk_dir(d, follow_links=False):
             # append the normalized file name
             yield os.path.abspath(os.path.join(root, name))
 
+def walk_paths(path_list, follow_links=False):
+    '''
+    Yields all the file names in a given list of files and directories
+    If 'follow_links' is True, symbolic links will be followed.
+
+    Files are guaranteed to be listed only once
+    '''
+
+    # keep track of files added to de-duplicate files supplied on command line and avoid
+    # symlink cycles
+    files = set()
+
+    for p in path_list:
+        if os.path.isdir(p):
+            for f in walk_dir(p):
+                if f not in files:
+                    files.add(f)
+                    yield f
+        else:
+            if p not in files:
+                files.add(p)
+                yield p
+
 def get_filetype(fname):
     '''Takes a file name and returns its MIME type.'''
 
@@ -243,14 +266,8 @@ if __name__ == '__main__':
         except OSError, e:
             log.error("Couldn't create directory '%s'" % args.output_dir)
 
-    # add all the files/directories in the args recursively
     log.info('Enumerating files...')
-    files = set()
-    for f in args.files:
-        if os.path.isdir(f):
-            files.update(walk_dir(f))
-        else:
-            files.add(f)
+    files = list(walk_paths(args.files))
     log.info('Found ' + str(len(files)) + ' files')
 
     # get the common prefix of all the files so we can preserve directory
