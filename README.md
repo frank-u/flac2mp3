@@ -31,8 +31,10 @@ Further options can be discovered through the `-h` or `--help` commands,
 including specifying the number of cores to use, a file to log console output
 to, and whether to overwrite existing files.
 
-Shortcomings
+Encoding Options
 ----
-Currently, there's no way to set the `lame` encoding options from the command
-line, and they're hardcoded to `-m s --vbr-new -V2`. To change them, edit the
-`lame_args` list in the `transcode` method.
+The default lame encoding settings are `-m s --vbr-new -V2`
+
+Additionally, the following lame encoding command line settings are supported:
+	`-Vx VBR quality settings`
+	`--preset /preset-name/`
