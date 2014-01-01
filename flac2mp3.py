@@ -100,7 +100,22 @@ def get_filetype(fname):
     p_file = sp.Popen(file_args, stdout=sp.PIPE)
     return p_file.communicate()[0].strip()
 
-def transcode(infile, outfile=None, skip_existing=False, bad_chars=''):
+
+def get_encoder_options(preset, vbr_quality):
+    '''
+    Construct lame command line options
+    '''
+    if preset:
+        # specify lame preset
+        return [ '--preset', preset ]
+    if vbr_quality:
+        # specify lame -Vn VBR quality setting
+        return [ '-m', 's', '--vbr-new', '-V' + str(vbr_quality) ]
+    # our defaults, ~190kbps, separate stereo mode
+    return [ '-m', 's', '--vbr-new', '-V2' ]
+
+
+def transcode(infile, outfile=None, skip_existing=False, bad_chars='', encoder_options=[]):
     '''
     Transcodes a single flac file into a single mp3 file.  Preserves the file
     name but changes the extension.  Copies flac tag info from the original file
@@ -135,9 +150,8 @@ def transcode(infile, outfile=None, skip_existing=False, bad_chars=''):
         # get the tags from the input file
         flac_tags = get_tags(infile)
 
-        # arguments for 'lame', including bitrate and tag values
-        vbr_quality = 2 # ~190 kbps
-        lame_args = ['lame', '-m', 's', '--vbr-new', '-V' + str(vbr_quality),
+        # arguments for 'lame', including encoder quality options, and tag values
+        lame_args = ['lame' ] + encoder_options + [
                 '--add-id3v2', '--silent',
                 '--tt', flac_tags['TITLE'],
                 '--ta', flac_tags['ARTIST'],
@@ -226,6 +240,10 @@ if __name__ == '__main__':
             help='log output to a file as well as to the console.')
     parser.add_argument('-q', '--quiet', action='store_true',
             help='Disable console output.')
+    parser.add_argument('-V', type=int, default='2', dest='vbr_quality',
+            help='VBR quality setting passed through to lame command line')
+    parser.add_argument('--preset', default=None,
+            help='lame preset setting passed through to lame command line')
     parser.add_argument('-c', '--copy-pattern', type=re.compile,
             help="Copy files who's names match the given pattern into the " +
             'output directory. Only works if an output directory is specified.')
@@ -329,8 +347,9 @@ if __name__ == '__main__':
             # lame takes care of other error messages.
             ensure_directory(os.path.dirname(outfile), ignore_errors=True)
 
+        encoder_options = get_encoder_options( args.preset, args.vbr_quality )
         # store the return code of the process so we can see if it errored
-        retcode = transcode(f, outfile, args.skip_existing, ':')
+        retcode = transcode(f, outfile, args.skip_existing, ':', encoder_options)
         total_time = time.time() - start_time
 
         # log success or error
