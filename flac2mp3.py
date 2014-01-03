@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from itertools import compress
+import itertools
 import multiprocessing as mp
 import os
 import re
@@ -218,6 +218,19 @@ def get_tags(infile):
 
     return tag_dict
 
+def lines_from_file(file):
+    '''
+    A generator to read lines from a file that does not buffer the input lines
+
+    Standard python file iterator line-buffering prevents interactive uses of stdin as
+    an input file.  Only readline() has the line-buffered behaviour we want.
+    '''
+    while True:
+        line = file.readline()
+        if line == '':
+            break
+        yield line.strip()
+
 if __name__ == '__main__':
     import logging
     import time
@@ -225,7 +238,7 @@ if __name__ == '__main__':
 
     # parse arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', metavar='FILES', type=str, nargs='+',
+    parser.add_argument('files', metavar='FILES', type=str, nargs='*',
             help='Files and/or directories to transcode')
 
     # options and flags
@@ -234,6 +247,9 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--root-dir', type=os.path.abspath,
             help='Root directory containing your source media.  Preserve directory ' +
             'structure from this point in --output-dir')
+    parser.add_argument('-f', '--file', nargs='?', type=argparse.FileType('r'), 
+            default=sys.stdin, dest='input_file',
+            help='Supply a list of files to transcode as a file, or default to stdin')
     parser.add_argument('-s', '--skip-existing', action='store_true',
             help='Skip transcoding files if the output file already exists')
     parser.add_argument('-l', '--logfile', type=os.path.normpath, default=None,
@@ -371,16 +387,28 @@ if __name__ == '__main__':
     # transcode all the found files
     terminated = False
     succeeded = False
+    results = []
     try:
-        result = pool.map_async(transcode_with_logging, files)
-        while 1:
+        # iterate over the paths listed on the command line followed by any files listed
+        # in file_input
+        # Use of lines_from_file() gives us nice line-by-line interactive behaviour if
+        # input file is stdin.  Use of itertools to chain the generators gives us
+        # lazy evaluation so we don't wait for EOF to starting transcoding jobs.
+        for f in walk_paths( itertools.chain(
+                            args.files,
+                            lines_from_file( args.input_file ) ) ):
+            results.append( pool.apply_async(transcode_with_logging, [f]))
+        # wait for all success results or first error exception
+        while len(results) > 0:
             try:
-                # wait for the result to come in, and mark success once it does
-                result.get(0.1)
-                succeeded = True
-                break
+                # get the results
+                results[0].get(timeout=0.1)
+                results.pop(0)
             except mp.TimeoutError:
                 continue
+        if len(results) == 0:
+            succeeded = True
+
     except KeyboardInterrupt:
         terminated = True
         pool.terminate()

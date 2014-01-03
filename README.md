@@ -27,6 +27,14 @@ Simple Usage
 If no output directory is specified, the new MP3 files are stored in the same
 directories as their FLAC parents.
 
+Files can also be provided on stdin
+
+`find . -type f | ./flac2mp3.py`
+
+Or in a file
+
+`python flac2mp3 --file list-of-files.txt`
+
 Further options can be discovered through the `-h` or `--help` commands,
 including specifying the number of cores to use, a file to log console output
 to, and whether to overwrite existing files.
