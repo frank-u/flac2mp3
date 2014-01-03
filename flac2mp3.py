@@ -303,10 +303,6 @@ if __name__ == '__main__':
         except OSError, e:
             log.error("Couldn't create directory '%s'" % args.output_dir)
 
-    log.info('Enumerating files...')
-    files = list(walk_paths(args.files))
-    log.info('Found ' + str(len(files)) + ' files')
-
     # get the common prefix of all the files so we can preserve directory
     # structure when an output directory is specified.
     if args.root_dir:
@@ -314,6 +310,9 @@ if __name__ == '__main__':
         common_prefix = args.root_dir
     else:
         # ...or detect the common prefix from the input file list
+        log.info('Enumerating files...')
+        files = list(walk_paths(args.files))
+        log.info('Found ' + str(len(files)) + ' files')
         common_prefix = os.path.dirname(os.path.commonprefix(files))
 
     def transcode_with_logging(f):
@@ -378,7 +377,7 @@ if __name__ == '__main__':
                     (short_fname, total_time))
 
     # log transcode status
-    log.info('Beginning transcode of %d files...' % len(files))
+    log.info('Beginning transcode...')
     overall_start_time = time.time()
 
     # build a thread pool for transcoding
