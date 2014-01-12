@@ -388,7 +388,7 @@ if __name__ == '__main__':
     # transcode all the found files
     terminated = False
     succeeded = False
-    results = []
+    pending_results = []
     try:
         # iterate over the paths listed on the command line followed by any files listed
         # in file_input
@@ -398,8 +398,13 @@ if __name__ == '__main__':
         for f in walk_paths( itertools.chain(
                             args.files,
                             lines_from_file( args.input_file ) ) ):
-            results.append( pool.apply_async(transcode_with_logging, [f]))
-        # wait for all success results or first error exception
+            pending_results.append( pool.apply_async(transcode_with_logging, [f]) )
+            # raise exception if any jobs have failed, and prune completed jobs
+            completed = [ r for r in pending_results if r.ready() ]
+            map(get, completed)
+            pending_results = [ r for r in pending_results if r not in completed ]
+
+        # wait for all remaining results or errors
         while len(results) > 0:
             try:
                 # get the results
