@@ -359,9 +359,8 @@ if __name__ == '__main__':
             outfile = os.path.join(args.output_dir,
                     mp3file.replace(common_prefix, '').strip('/'))
 
-            # make the directory to ensure it exists. ignore errors since
-            # lame takes care of other error messages.
-            ensure_directory(os.path.dirname(outfile), ignore_errors=True)
+            # make the directory to ensure it exists.
+            ensure_directory(os.path.dirname(outfile))
 
         encoder_options = get_encoder_options( args.preset, args.vbr_quality )
         # store the return code of the process so we can see if it errored
