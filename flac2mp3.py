@@ -360,7 +360,6 @@ if __name__ == '__main__':
                     mp3file.replace(common_prefix, '').strip('/'))
 
             # make the directory to ensure it exists.
-            print "ensure ", outfile
             ensure_directory(os.path.dirname(outfile))
 
         encoder_options = get_encoder_options( args.preset, args.vbr_quality )
@@ -401,18 +400,18 @@ if __name__ == '__main__':
             pending_results.append( pool.apply_async(transcode_with_logging, [f]) )
             # raise exception if any jobs have failed, and prune completed jobs
             completed = [ r for r in pending_results if r.ready() ]
-            map(get, completed)
+            map(mp.pool.AsyncResult.get, completed)
             pending_results = [ r for r in pending_results if r not in completed ]
 
         # wait for all remaining results or errors
-        while len(results) > 0:
+        while len(pending_results) > 0:
             try:
                 # get the results
-                results[0].get(timeout=0.1)
-                results.pop(0)
+                pending_results[0].get(timeout=0.1)
+                pending_results.pop(0)
             except mp.TimeoutError:
                 continue
-        if len(results) == 0:
+        if len(pending_results) == 0:
             succeeded = True
 
     except KeyboardInterrupt:
