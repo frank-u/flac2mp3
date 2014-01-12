@@ -225,7 +225,7 @@ def lines_from_file(file):
     Standard python file iterator line-buffering prevents interactive uses of stdin as
     an input file.  Only readline() has the line-buffered behaviour we want.
     '''
-    while True:
+    while file and True:
         line = file.readline()
         if line == '':
             break
@@ -248,8 +248,8 @@ if __name__ == '__main__':
             help='Root directory containing your source media.  Preserve directory ' +
             'structure from this point in --output-dir')
     parser.add_argument('-f', '--file', nargs='?', type=argparse.FileType('r'), 
-            default=sys.stdin, dest='input_file',
-            help='Supply a list of files to transcode as a file, or default to stdin')
+            default=None, dest='input_file',
+            help='Supply a list of files to transcode in FILE')
     parser.add_argument('-s', '--skip-existing', action='store_true',
             help='Skip transcoding files if the output file already exists')
     parser.add_argument('-l', '--logfile', type=os.path.normpath, default=None,
@@ -311,7 +311,9 @@ if __name__ == '__main__':
     else:
         # ...or detect the common prefix from the input file list
         log.info('Enumerating files...')
-        files = list(walk_paths(args.files))
+        files = list( walk_paths( itertools.chain(
+                            args.files,
+                            lines_from_file( args.input_file ) )
         log.info('Found ' + str(len(files)) + ' files')
         common_prefix = os.path.dirname(os.path.commonprefix(files))
 
