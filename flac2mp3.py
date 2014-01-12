@@ -313,7 +313,7 @@ if __name__ == '__main__':
         log.info('Enumerating files...')
         files = list( walk_paths( itertools.chain(
                             args.files,
-                            lines_from_file( args.input_file ) )
+                            lines_from_file( args.input_file ) ) ) )
         log.info('Found ' + str(len(files)) + ' files')
         common_prefix = os.path.dirname(os.path.commonprefix(files))
 
