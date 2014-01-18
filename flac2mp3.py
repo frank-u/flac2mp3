@@ -320,8 +320,6 @@ if __name__ == '__main__':
     def transcode_with_logging(f):
         '''Transcode the given file and print out progress statistics.'''
 
-        short_fname = os.path.basename(f)
-
         # copy any non-FLAC files to the output dir if they match a pattern
         if 'audio/x-flac' not in get_filetype(f):
             if args.output_dir is not None and args.copy_pattern is not None:
@@ -332,22 +330,22 @@ if __name__ == '__main__':
                     try:
                         ensure_directory(os.path.dirname(dest))
                         shutil.copy(f, dest)
-                        log.info("Copied '%s' ('%s' matched)", short_fname,
+                        log.info("Copied '%s' ('%s' matched)", f,
                                 match.group(0))
                     except Exception, e:
-                        log.error("Failed to copy '%s' (%s)", short_fname,
+                        log.error("Failed to copy '%s' (%s)", f,
                                 e.message)
 
                     # we're done once we've attempted a copy
                     return
 
-            log.info("Skipped '%s'", short_fname)
+            log.info("Skipped '%s'", f)
 
             # never proceed further if the file wasn't a FLAC file
             return
 
         # a more compact file name representation
-        log.info("Transcoding '%s'..." % short_fname)
+        log.info("Transcoding '%s'..." % f)
 
         # time the transcode
         start_time = time.time()
@@ -369,13 +367,13 @@ if __name__ == '__main__':
 
         # log success or error
         if retcode == 0:
-            log.info("Transcoded '%s' in %.2f seconds" % (short_fname,
+            log.info("Transcoded '%s' in %.2f seconds" % (f,
                 total_time))
         elif retcode == None:
-            log.info("Skipped '%s'", short_fname)
+            log.info("Skipped '%s'", f)
         else:
             log.error("Failed to transcode '%s' after %.2f seconds" %
-                    (short_fname, total_time))
+                    (f, total_time))
 
     # log transcode status
     log.info('Beginning transcode...')
