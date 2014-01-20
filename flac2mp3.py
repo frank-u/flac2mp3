@@ -173,16 +173,17 @@ def transcode(infile, outfile=None, skip_existing=False, bad_chars='', encoder_o
         # allow p_flac to receive a SIGPIPE if p_lame exits
         p_flac.stdout.close()
 
+        p_flac_retval = p_flac.wait()
         # wait for the encoding to finish
-        retval = p_lame.wait()
+        p_lame_retval = p_lame.wait()
 
         # if the transcode worked, link the temp file to the final filename
-        if retval == 0:
+        if p_lame_retval == 0 and p_flac_retval == 0:
             shutil.move(temp_outfile.name, outfile)
             # we're keeping this temp file.  Don't delete it
             temp_outfile.delete = False
 
-    return retval
+    return p_flac_retval or p_lame_retval
 
 def get_tags(infile):
     '''
