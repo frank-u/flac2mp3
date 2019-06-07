@@ -41,7 +41,7 @@ to, and whether to overwrite existing files.
 
 Encoding Options
 ----
-The default lame encoding settings are `-m s --vbr-new -V2`
+The default lame encoding settings are `-q0 -V0`
 
 Additionally, the following lame encoding command line settings are supported:
 	`-Vx VBR quality settings`
