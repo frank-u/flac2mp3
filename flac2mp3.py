@@ -111,8 +111,8 @@ def get_encoder_options(preset, vbr_quality):
     if vbr_quality:
         # specify lame -Vn VBR quality setting
         return [ '-m', 's', '--vbr-new', '-V' + str(vbr_quality) ]
-    # our defaults, ~190kbps, separate stereo mode
-    return [ '-m', 's', '--vbr-new', '-V2' ]
+    # defaults: highest quality
+    return [ '-q0', '-V0' ]
 
 
 def transcode(infile, outfile=None, skip_existing=False, bad_chars='', encoder_options=[]):
