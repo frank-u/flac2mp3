@@ -370,7 +370,7 @@ if __name__ == '__main__':
         if retcode == 0:
             log.info("Transcoded '%s' in %.2f seconds" % (f,
                 total_time))
-        elif retcode == None:
+        elif retcode is None:
             log.info("Skipped '%s'", f)
         else:
             log.error("Failed to transcode '%s' after %.2f seconds" %
