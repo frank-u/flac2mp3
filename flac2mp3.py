@@ -333,7 +333,7 @@ if __name__ == '__main__':
                         shutil.copy(f, dest)
                         log.info("Copied '%s' ('%s' matched)", f,
                                 match.group(0))
-                    except Exception, e:
+                    except Exception as e:
                         log.error("Failed to copy '%s' (%s)", f,
                                 e.message)
 
