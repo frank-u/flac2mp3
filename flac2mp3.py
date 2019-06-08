@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 import itertools
 import multiprocessing as mp
@@ -17,7 +17,7 @@ def get_missing_programs(required_programs):
     for program in required_programs:
         try:
             sp.call(program, stdout=sp.PIPE, stderr=sp.STDOUT)
-        except OSError, e:
+        except OSError as e:
             # if the binary couldn't be found, put it in the list
             if e.errno == 2:
                 missing.append(program)
@@ -37,7 +37,7 @@ def ensure_directory(d, ignore_errors=False):
     try:
         os.makedirs(d)
         return True
-    except OSError, e:
+    except OSError as e:
         # propogate the error if it DOESN'T indicate that the directory already
         # exists.
         if e.errno != 17 and not ignore_errors:
@@ -301,7 +301,7 @@ if __name__ == '__main__':
     if args.output_dir is not None:
         try:
             ensure_directory(args.output_dir)
-        except OSError, e:
+        except OSError as e:
             log.error("Couldn't create directory '%s'" % args.output_dir)
 
     # get the common prefix of all the files so we can preserve directory
@@ -417,7 +417,7 @@ if __name__ == '__main__':
         terminated = True
         pool.terminate()
         pool.join()
-    except Exception, e:
+    except Exception as e:
         # catch and log all other exceptions gracefully
         log.exception(e)
 
