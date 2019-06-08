@@ -110,7 +110,7 @@ def get_encoder_options(preset, vbr_quality):
         return [ '--preset', preset ]
     if vbr_quality:
         # specify lame -Vn VBR quality setting
-        return [ '-m', 's', '--vbr-new', '-V' + str(vbr_quality) ]
+        return [ '-q0', '-V' + str(vbr_quality) ]
     # defaults: highest quality
     return [ '-q0', '-V0' ]
 
